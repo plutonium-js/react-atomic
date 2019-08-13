@@ -1,0 +1,151 @@
+<!DOCTYPE html><html><head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample - Controlled 2</title>
+    
+    <!-- page CSS -->
+    <style>
+      	body {background-color:#d9e2eb;color:black;}
+		body * {box-sizing:border-box;}
+		#root {
+			position:fixed;
+			width:100%;
+			height:100%;
+		}
+		.button {
+			flex:1,
+			position:relative;
+			margin:auto;
+			background-color:#3b4148;
+			padding:1.5vmax 3vmax 1.5vmax 3vmax;
+			border-radius:10%;
+			border:solid 2px #222;
+			color:#ccc;
+			cursor:pointer;
+			user-select:none;
+			font-family:Arial, Helvetica, Sans-Serif;
+			font-weight:bold;
+			box-shadow:0px 0px 4px #333;
+		}
+		.button:hover {
+			border-color:#000;
+			color:#eee;
+			background-color:#555a60;
+		}
+		#container {
+			display:flex;
+			position:absolute;
+			flex-direction:column;
+			width:80%;
+			height:80%;
+			top:0;
+			bottom:0;
+			left:0;
+			right:0;
+			margin:auto;
+			border:solid 2px #666;
+			background-color:#EBF0F5;
+		}
+		#row-top {
+			display:flex;
+			position:relative;
+			flex:1;
+			max-height:100px;
+			background-color:rgba(0,0,0,.2);
+			border:solid 1px #666;
+			border-width:0px 0px 2px 0px;
+			align-content:center;
+			justify-content:center;
+		}
+		#row-bottom {
+			position:relative;
+			flex:1;
+			align-content:center;
+			justify-content:center;
+		}
+		#circle {
+			position:absolute;
+			width:20vh;
+			height:20vh;
+			top:0;
+			bottom:0;
+			left:0;
+			right:0;
+			margin:auto;
+			border:solid 4px #666;
+			border-radius:50%;
+			background-color:#79d11f;
+			background:radial-gradient(ellipse closest-side at 50% 50%,rgba(158,255,60,1) 0%,rgba(99,181,15,1) 100%);
+			box-shadow:0px 0px 4px #333;
+			transform:translateX(-20vw);
+		}
+	</style>
+
+</head>
+<body>
+
+    <div id="root"></div>
+    
+	<!-- React and Babel -->
+	<script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+	<script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+	<script src = "https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js" crossorigin></script>
+	
+	<!-- @plutonium-js/react-atomic component -->
+	<script src="https://cdn.jsdelivr.net/npm/@plutonium-js/react-atomic@1/dist/bundle.min.js"></script>   
+ 	<!-- sample script -->
+	<script type="text/babel">
+		class App extends React.Component{
+			render() {
+				const Atomic = window["react-atomic"].default;
+				return <div id="container">
+					<div id="row-top">
+						<div
+							className = "button"
+							onClick = {e => {
+								this.AtomicRef.current.setPlayState('running');
+							}}
+						>Run</div>
+						<div
+							className = "button"
+							onClick = {e => {
+								this.AtomicRef.current.setPlayState('paused');
+							}}
+						>Pause</div>
+						<div
+							className = "button"
+							onClick = {e => {
+								this.AtomicRef.current.setPlayState('reset');
+							}}
+						>Reset</div>
+						<div
+							className = "button"
+							onClick = {e => {
+								this.AtomicRef.current.setPlayState('cancel');
+							}}
+						>Cancel</div>
+					</div>
+					<div id="row-bottom">
+						<Atomic
+							id = "circle"
+							animate = {{
+								keyframes:`
+									to {
+										transform:translateX(20vw);
+									}
+								`,
+								animation:'3s ease-in-out infinite alternate',
+								playState:'running'
+							}}
+							ref = {this.AtomicRef=React.createRef()}
+						></Atomic>
+					</div>
+				</div>;
+			}
+		}
+		ReactDOM.render(<App/>, document.querySelector('#root'));
+	</script>
+	
+</body>
+</html>

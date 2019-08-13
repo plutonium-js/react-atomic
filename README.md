@@ -32,7 +32,7 @@ Atomic is an ultra lightweight React component that simplifies the management an
 
 ### <a id="Installation"></a>Installation
 ```
-> npm install react-atomic
+> npm install @plutonium-js/react-atomic
 ```
 
 **[:arrow_up_small:](#bookmarks)**	

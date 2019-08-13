@@ -1,0 +1,76 @@
+<!DOCTYPE html><html><head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample - Simple</title>
+    
+    <!-- page CSS -->
+    <style>
+      	body {background-color:#d9e2eb;color:black;}
+		body * {box-sizing:border-box;}
+		#root {
+			position:fixed;
+			width:100%;
+			height:100%;
+		}
+		#myElement {
+			position:absolute;
+			width:30%;
+			height:30%;
+			top:0;
+			bottom:0;
+			left:0;
+			right:0;
+			margin:auto;
+			border:dashed 4px #666;
+			display:grid;
+			align-content:center;
+			text-align:center;
+			font-family:Impact, Charcoal, Sans-Serif;
+			font-size:5vh;
+			background-color:#EBF0F5;
+		}
+	</style>
+
+</head>
+<body>
+
+    <div id="root"></div>
+    
+	<!-- React and Babel -->
+	<script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+	<script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+	<script src = "https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js" crossorigin></script>
+	
+	<!-- @plutonium-js/react-atomic component -->
+    <script src="https://cdn.jsdelivr.net/npm/@plutonium-js/react-atomic@1/dist/bundle.min.js"></script>
+	<!-- sample script -->
+	<script type="text/babel">
+		class App extends React.Component{
+			constructor(props) {
+				super(props);
+			}
+			render() {
+				const Atomic = window["react-atomic"].default;
+				return <Atomic
+					id = "myElement"
+					animate = {{
+						keyframes:`
+							from {
+								transform:rotate(0deg)
+							}
+							to {
+								transform:rotate(360deg)
+							}
+						`,
+						animation:"8s ease",
+						playState:'running'
+					}}
+				>Plutonium Atomic!</Atomic>;
+			}
+		}
+		ReactDOM.render(<App/>, document.querySelector('#root'));
+	</script>
+	
+</body>
+</html>
