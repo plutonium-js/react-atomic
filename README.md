@@ -26,7 +26,7 @@ Atomic is an ultra lightweight React component that simplifies the management an
 * [Animate](#animate)
 * [Key Frames or Transitions](#key_frames_or_transitions)
 * [Adding State](#adding_state)
-* [Controlling](#controlling)
+* [Control](#control)
 * [License](#License)
 
 
@@ -41,7 +41,7 @@ Atomic is an ultra lightweight React component that simplifies the management an
 
 * <a id="Module"></a>**Module**
    
-   Using ES...
+   Using ES6...
    ```javascript
    import Atomic from '@plutonium-js/react-atomic';
    ```
@@ -60,7 +60,7 @@ Atomic is an ultra lightweight React component that simplifies the management an
 **[:arrow_up_small:](#bookmarks)**	
    
 ### <a id="create_component"></a>Create Component
-To create a basic Atomic component, add the 'Atomic' tag to your JSX. Your content can be any text, elements, or other React components.
+To create a basic Atomic component, add the 'Atomic' tag to your JSX. The child content can be any text, elements, or other React components.
 ```jsx
 class App extends Component {
    render() {
@@ -125,15 +125,15 @@ transitions:{
    playState:'running'
 }
 ```
-With transforms the 'to' value is required. With both key frames and transforms the 'from' value is optional.  If 'from' is omitted the animation or transition will start at the elements applied style value.
+With transitions the 'to' value is required. With both key frames and transitions the 'from' value is optional.  If 'from' is omitted the animation or transition will start at the elements applied style value.
 
 **[:arrow_up_small:](#bookmarks)**	
 
 ### <a id="adding_state"></a>Adding State
-Add state to any part of the animate property or the entire value.  When rendering animate state changes, Atomic resets the animation and resumes the current play state.
+Add state to any part of the animate property or the entire value.  When rendering animation state changes Atomic resets the animation and resumes the current play state.
 
 TIP: To add state to an ES6 template string (backtick '`' enclosed content) use the standard interpolation data syntax '${data}'...
-```jsx
+```javascript
 keyframes:`
    from {
       transform:rotate(0deg);
@@ -146,7 +146,7 @@ keyframes:`
 
 **[:arrow_up_small:](#bookmarks)**	
 
-### <a id="controlling"></a>Controlling
+### <a id="control"></a>Control
 The API exposes the 'setPlayState' method for controlling animations.  The example below resets the key frame animation when clicking the element.
 ```jsx
 return <Atomic

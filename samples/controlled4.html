@@ -115,11 +115,11 @@
 			constructor(props) {
 				super(props);
 				this.state = {
-					keyframes:`
-						to {
-							transform:translateX(20vw);
+					transitions:{
+						transform:{
+							to:'translateX(20vw)'
 						}
-					`,
+					},
 					buttons:{
 						toggleRotation:{
 							active:false,
@@ -131,21 +131,21 @@
 			render() {
 				const Atomic = window["react-atomic"].default;
 				return <React.Fragment>
-					<div id="title">CSS Key Frames Sample</div>
+					<div id="title">CSS Transition Sample</div>
 					<div id="container">
 						<div id="row-top">
 							<div
 								className = "button"
 								onClick = {e => {
-									this.AtomicRef.current.setPlayState('running');
+									this.AtomicRef.current.setPlayState('to');
 								}}
-							>Run</div>
+							>To</div>
 							<div
 								className = "button"
 								onClick = {e => {
-									this.AtomicRef.current.setPlayState('paused');
+									this.AtomicRef.current.setPlayState('from');
 								}}
-							>Pause</div>
+							>From</div>
 							<div
 								className = "button"
 								onClick = {e => {
@@ -163,8 +163,8 @@
 							<Atomic
 								id = "circle"
 								animate = {{
-									keyframes:this.state.keyframes,
-									animation:'3s ease-in-out infinite alternate',
+									transitions:this.state.transitions,
+									animation:'3s ease-in-out',
 									playState:'running'
 								}}
 								ref = {this.AtomicRef=React.createRef()}
@@ -176,15 +176,15 @@
 								onClick = {e => {
 									const active = !this.state.buttons.toggleRotation.active;
 									this.setState({
-										keyframes:active?`
-											to {
-												transform:translateX(20vw) rotate(360deg);
+										transitions:active?{
+											transform:{
+												to:'translateX(20vw) rotate(360deg)'
 											}
-										`:`
-											to {
-												transform:translateX(20vw);
+										}:{
+											transform:{
+												to:'translateX(20vw)'
 											}
-										`,
+										},
 										buttons:{toggleRotation:{
 											active:active,
 											addClassNames:active?'active':''
@@ -194,7 +194,7 @@
 							>Toggle Rotation</div>
 						</div>
 					</div>
-				</React.Fragment>;
+				</React.Fragment>
 			}
 		}
 		ReactDOM.render(<App/>, document.querySelector('#root'));

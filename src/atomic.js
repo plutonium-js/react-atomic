@@ -31,6 +31,11 @@ const _LIB = _PU.reactAtomicLib = _PU.reactAtomicLib||new function() {
 			}
 		}
 	
+		//capitalize the first letter of a string
+		this.capitalize = function(string) { 
+			return string.charAt(0).toUpperCase()+string.substring(1); 
+		}
+	
 		//parse camel case property name (e.g. borderWidth to border-width)
 		this.parseCamelCase = function(name, delimiter) {
 			return  (name+'').replace(/([a-zA-Z])(?=[A-Z])/g, '$1'+(delimiter||'-')).toLowerCase();
@@ -81,15 +86,18 @@ const _LIB = _PU.reactAtomicLib = _PU.reactAtomicLib||new function() {
 					sheet = animation.sheet = d.styleSheets[d.styleSheets.length-1];
 				}
 				else for (let i=sheet.rules.length-1;i>=0;i--) sheet.deleteRule(i);
-				const selector = (_COMP.props.id?'#'+_COMP.props.id:'')+'.PU-'+_COMP.uid+'-'+uid;
-				if (data.keyframes) {
+				const rules = sheet.rules;
+				const selector = (_COMP.props.id?'#'+_COMP.props.id+(uid!=='root'?' ':''):'')+'.PU-'+_COMP.uid+'-'+uid;
+				const keyframes = data.keyframes; if (keyframes) {
+					const defaultStyles = keyframes.defaultStyles||'';
 					for (let i=0;i<2;i++) {
 						let ri = (i*2);
-						sheet.insertRule('@keyframes '+_COMP.uid+'-'+uid+'-'+i+'{'+data.keyframes+'}', 0+ri);
-						sheet.insertRule(selector+'.PU-alternate-'+i+' {animation:'+_COMP.uid+'-'+uid+'-'+i+' '+(data.animation||'2s both')+';}', 1+ri);
+						sheet.insertRule('@keyframes '+_COMP.uid+'-'+uid+'-'+i+'{'+(typeof keyframes=="string"?keyframes:keyframes.val)+'}',  rules.length);
+						sheet.insertRule(selector+'.PU-alternate-'+i+' {animation:'+_COMP.uid+'-'+uid+'-'+i+' '+(data.animation||'2s both')+';}',  rules.length);
 					}
-					sheet.insertRule(selector+'.PU-anim-state-paused {animation-play-state:paused;', 4);
-					sheet.insertRule(selector+'.PU-anim-state-cancel,'+selector+'.PU-anim-state-reset {animation:unset;', 5);
+					sheet.insertRule(selector+'.PU-anim-state-paused {animation-play-state:paused;}',  rules.length);
+					sheet.insertRule(selector+'.PU-anim-state-cancel,'+selector+'.PU-anim-state-reset {animation:unset;}',  rules.length);
+					if (defaultStyles) sheet.insertRule(selector+' {'+defaultStyles+'}',  rules.length);
 				}
 				else if (data.transitions) {
 					let toVals = '', fromVals = '', anims = '';
@@ -98,14 +106,13 @@ const _LIB = _PU.reactAtomicLib = _PU.reactAtomicLib||new function() {
 						let trans = data.transitions[i];
 						if (trans.hasOwnProperty('to')) toVals += cssStyleName+':'+trans.to+';';
 						if (trans.hasOwnProperty('from')) fromVals += cssStyleName+':'+trans.from+';';
-						anims += (anims?',':'')+cssStyleName+' '+(trans.animation||data.animation);
+						anims += (anims?',':'')+cssStyleName+' '+(trans.animation||data.animation).replace(/normal|forwards|backwards|both|reverse|alternate|alternate\-revers|infinite/i,"");
 						animation.qty++;
 					}
-					const rules = sheet.rules;
 					sheet.insertRule(selector+' {transition:'+anims+';'+fromVals+'}', rules.length);
 					sheet.insertRule(selector+'.PU-trans-state-to {'+toVals+'}', rules.length);
 					sheet.insertRule(selector+'.PU-trans-state-from {'+fromVals+'}', rules.length);
-					sheet.insertRule(selector+'.PU-trans-state-cancel,'+selector+'.PU-trans-state-reset {transition:none;}', rules.length);
+					sheet.insertRule(selector+'.PU-trans-state-cancel,'+selector+'.PU-trans-state-reset {transition:none;'+fromVals+'}', rules.length);
 				}
 			}
 		}
@@ -124,48 +131,72 @@ const _LIB = _PU.reactAtomicLib = _PU.reactAtomicLib||new function() {
 		//easing functions
 		this.ease = {
 			in:{
-				quadratic:(t,b,c,d) => {return c*(t/=d)*t+b;},
-				cubic: (t,b,c,d) => {return c*(t/=d)*t*t + b;},
-				quartic:(t,b,c,d) => {return c*(t/=d)*t*t*t + b;},
-				quintic:(t,b,c,d) => {return c*(t/=d)*t*t*t*t + b;},
-				sinusoidal:(t,b,c,d) => {return -c * Math.cos(t/d * (Math.PI/2)) + c + b;},
-				exponential:(t,b,c,d) => {return (t==0) ? b : c * Math.pow(2, 10 * (t/d - 1)) + b;},
-				circular:(t,b,c,d) => {return -c * (Math.sqrt(1 - (t/=d)*t) - 1) + b;},
+				quadratic:(t,b,c,d) => c*(t/=d)*t+b,
+				cubic: (t,b,c,d) => c*(t/=d)*t*t+b,
+				quartic:(t,b,c,d) => c*(t/=d)*t*t*t+b,
+				quintic:(t,b,c,d) => c*(t/=d)*t*t*t*t+b,
+				sinusoidal:(t,b,c,d) => -c*Math.cos(t/d*(Math.PI/2))+c+b,
+				exponential:(t,b,c,d) => t==0 ? b : c*Math.pow(2,10*(t/d - 1))+b,
+				circular:(t,b,c,d) => -c*(Math.sqrt(1-(t/=d)*t)-1)+b
 			},
 			out:{
-				quadratic:(t,b,c,d) => {return -c *(t/=d)*(t-2) + b;},
-				cubic:(t,b,c,d) => {return c*((t=t/d-1)*t*t + 1) + b;},
-				quartic:(t,b,c,d) => {return -c * ((t=t/d-1)*t*t*t - 1) + b;},
-				quintic:(t,b,c,d) => {return c*((t=t/d-1)*t*t*t*t + 1) + b;},
-				sinusoidal:(t,b,c,d) => {return c * Math.sin(t/d * (Math.PI/2)) + b;},
-				exponential:(t,b,c,d) => {return (t==d) ? b+c : c * (-Math.pow(2, -10 * t/d) + 1) + b;},
-				circular:(t,b,c,d) => {return c * Math.sqrt(1 - (t=t/d-1)*t) + b;},
+				quadratic:(t,b,c,d) => -c*(t/=d)*(t-2)+b,
+				cubic:(t,b,c,d) => c*((t=t/d-1)*t*t+1)+b,
+				quartic:(t,b,c,d) => -c*((t=t/d-1)*t*t*t-1)+b,
+				quintic:(t,b,c,d) => c*((t=t/d-1)*t*t*t*t+1)+b,
+				sinusoidal:(t,b,c,d) => c*Math.sin(t/d*(Math.PI/2))+b,
+				exponential:(t,b,c,d) => t==d ? b+c : c*(-Math.pow(2,-10*t/d)+1)+b,
+				circular:(t,b,c,d) => c*Math.sqrt(1-(t=t/d-1)*t)+b
 			},
 			inout:{
-				linear:(t,b,c,d) => {return c*t/d+b;},
-				quadratic:(t,b,c,d) => {if ((t/=d/2) < 1) return c/2*t*t + b;return -c/2 * ((--t)*(t-2) - 1) + b;},
-				cubic:(t,b,c,d) => {if ((t/=d/2) < 1) return c/2*t*t*t + b;return c/2*((t-=2)*t*t + 2) + b;},
-				quartic:(t,b,c,d) => {if ((t/=d/2) < 1) return c/2*t*t*t*t + b;return -c/2 * ((t-=2)*t*t*t - 2) + b;},
-				quintic:(t,b,c,d) => {if ((t/=d/2) < 1) return c/2*t*t*t*t*t + b;return c/2*((t-=2)*t*t*t*t + 2) + b;},
-				sinusoidal:(t,b,c,d) => {return -c/2 * (Math.cos(Math.PI*t/d) - 1) + b;},
-				exponential:(t,b,c,d) => {if (t==0) return b;if (t==d) return b+c;if ((t/=d/2) < 1) return c/2 * Math.pow(2, 10 * (t - 1)) + b;return c/2 * (-Math.pow(2, -10 * --t) + 2) + b;},
-				circular:(t,b,c,d) => {if ((t/=d/2) < 1) return -c/2 * (Math.sqrt(1 - t*t) - 1) + b;return c/2 * (Math.sqrt(1 - (t-=2)*t) + 1) + b;},
+				linear:(t,b,c,d) => c*t/d+b,
+				quadratic:(t,b,c,d) => (t/=d/2)<1 ? c/2*t*t+b : -c/2*((--t)*(t-2)-1)+ b,
+				cubic:(t,b,c,d) => (t/=d/2)<1 ? c/2*t*t*t+b : c/2*((t-=2)*t*t+2)+b,
+				quartic:(t,b,c,d) => (t/=d/2)<1 ? c/2*t*t*t*t+b : -c/2*((t-=2)*t*t*t-2)+b,
+				quintic:(t,b,c,d) => (t/=d/2)<1 ? c/2*t*t*t*t*t+b : c/2*((t-=2)*t*t*t*t+2)+b,
+				sinusoidal:(t,b,c,d) => -c/2 * (Math.cos(Math.PI*t/d)-1)+b,
+				exponential:(t,b,c,d) => t==0 ? b : t==d ? b+c : (t/=d/2)<1 ? c/2*Math.pow(2,10*(t - 1))+b : c/2*(-Math.pow(2,-10*--t)+2)+b,
+				circular:(t,b,c,d) => (t/=d/2)<1 ? -c/2*(Math.sqrt(1-t*t)-1)+b : c/2*(Math.sqrt(1-(t-=2)*t)+1)+ b
+			}
+		}
+	}
+	
+	//asynchronous reference manager (setTimeout, requestAnimationFrame, and future functionality as needed)
+	this.asyncRefs = function() {
+		const _T = this;
+		const refs = {};
+		
+		//add a reference
+		this.add = function(id, type, obj) {
+			_T.cancel(id);
+			refs[id] = {
+				obj:obj,
+				type:type
+			}
+		}
+		
+		//cancel a reference
+		this.cancel = function(id) {
+			let ref = refs[id]; if (ref) {
+				if (ref.type==='setTimeout') clearTimeout(ref.obj);
+				else if (ref.type==='requestAnimationFrame') cancelAnimationFrame(ref.obj);
+				delete refs[id];
 			}
 		}
 	}
 	
 	//returns a default root atomic component element.
-	this.getRoot = function(_COMP, props) {
-		props = props||{};
+	this.getRoot = function(_COMP, addProps, remove) {
+		addProps = addProps||{};
 		let compProps = {..._COMP.props};
-		delete compProps.animate;
+		(remove||[]).forEach(key => delete compProps[key]);
 		return <div
 			{...compProps}
-			{...props}
+			{...addProps}
 			ref = {_COMP.rootRef = React.createRef()}
-			className = {_LIB.getRootClassNames(_COMP, props)}
-			style = {Object.assign(props.style||{}, _COMP.props.style)}
-		>{props.children||_COMP.props.children}</div>;
+			className = {_LIB.getRootClassNames(_COMP, addProps)}
+			style = {Object.assign(addProps.style||{}, _COMP.props.style)}
+		>{addProps.children||_COMP.props.children}</div>;
 	}
 	
 	//returns the root atomic component class names
@@ -173,6 +204,7 @@ const _LIB = _PU.reactAtomicLib = _PU.reactAtomicLib||new function() {
 		data = data||{};
 		return ['PU-Atomic',
 			_COMP.name!=='Atomic'?('PU-'+_COMP.name||''):'',
+			_COMP.name&&_COMP.props.type?('PU-'+_COMP.name+'-'+_COMP.props.type):'',
 			_COMP.props.className,
 			data.className||'',
 			'PU-anim-state-'+_COMP.state.animState,
@@ -188,6 +220,7 @@ export class Atomic extends React.Component{
 		super(props);
 		this._LIB = _LIB;
 		this.name = 'Atomic';
+		this.asyncRefs = new _LIB.asyncRefs();
 		this.state = {
 			transState:'none',
 			animState:'none',
@@ -198,18 +231,20 @@ export class Atomic extends React.Component{
 		this.handleAnimationEnd = this.handleAnimationEnd.bind(this);
 		this.playState = 'none';
 		this._addAnimation();
+		this.ended = false;
+		this.autoReset = true;
 	}
 	render(elm) {
 		elm = elm||_LIB.getRoot(this, {
 			className:'PU-'+this.uid+'-root'
-		});
+		},['animate']);
 		elm.props.onAnimationEnd = elm.props.onTransitionEnd = this.handleAnimationEnd;
 		return elm;
 	}
 	getSnapshotBeforeUpdate(prevProps, prevState) {
 		if (!_LIB.util.compare([this._getRootAnimateData(prevProps.animate), this._getRootAnimateData()],{deep:true})) {
 			this._addAnimation();
-			this.setPlayState('reset', {superOnly:true, resetToPlayState:this.playState});
+			this.setPlayState('reset', {superOnly:true, resetToPlayState:/none|cancel/.test(this.playState)?'running':this.playState});
 		}
 		return null;
 	}
@@ -222,20 +257,32 @@ export class Atomic extends React.Component{
 	//set the play state ('none', 'paused', 'running', 'ended', 'cancel', 'reset')
 	setPlayState(type, params) {
 		params = params||{};
-		if (type==='toggle') type = this.playState==='running'?'paused':this.playState==='paused'?'running':'running';
-		const state = {};
-		if (/to|from|ended|running|cancel|reset/.test(type) || (type==='paused'&&this.playState==='running')) state.animState = {to:'running',from:'paused'}[type]||type;
-		if (type==='running' && /ended|none|reset|cancel/.test(this.state.animState)) state.alternate = this.state.alternate?0:1;
-		if (/to|from|running|paused|cancel|reset/.test(type)) state.transState = {running:'to',paused:'from'}[type]||type;
-		this.setState(state);
-		if (!params.skipReset && type==='reset') requestAnimationFrame(() => {this.setPlayState(params.resetToPlayState||'running')});
-		this.playState = type;
+		if (this.autoReset && this.ended && /to|running/.test(type)) this.setPlayState('reset', params);
+		else {
+			if (/reset|to|running/.test(type)) this.ended = false;
+			if (type==='toggle') type = this.playState==='running'?'paused':this.playState==='paused'?'running':'running';
+			const state = {};
+			if (/to|from|running|cancel|reset/.test(type) || (type==='paused'&&this.playState==='running')) state.animState = {to:'running',from:'paused'}[type]||type;
+			if (type==='running' && /none|reset|cancel/.test(this.state.animState)) state.alternate=this.state.alternate?0:1;
+			if (/to|from|running|paused|cancel|reset/.test(type)) state.transState = {running:'to',paused:'from'}[type]||type;
+			this.setState(state);
+			if (!params.skipReset && type==='reset') this.asyncRefs.add("reset", "requestAnimationFrame", requestAnimationFrame(() => {
+				//note: force reflow here to ensure the running class is applied by the browser on the next animation frame
+				_T.rootRef.current.offsetWidth;
+				this.asyncRefs.add("reset", "requestAnimationFrame", requestAnimationFrame(() => {this.setPlayState(params.resetToPlayState||'running')}));
+			}));
+			this.playState = type;
+		}
 	}
 	
 	//handle animation and transition end
 	handleAnimationEnd(e) {
-		this.setPlayState('ended', {superOnly:true});
+		this.ended=true;
 		e.stopPropagation();
+		if (this.props.onAnimateEnd) this.props.onAnimateEnd({
+			component:this,
+			nativeEvent:e
+		});
 	}
 	
 	//get the root animate data

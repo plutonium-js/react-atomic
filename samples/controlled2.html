@@ -6,12 +6,14 @@
     
     <!-- page CSS -->
     <style>
-      	body {background-color:#d9e2eb;color:black;}
+      	body {background-color:#d9e2eb;color:black;font-size:16px;}
 		body * {box-sizing:border-box;}
 		#root {
 			position:fixed;
 			width:100%;
 			height:100%;
+			font-family:Arial, Helvetica, Sans-Serif;
+			font-weight:bold;
 		}
 		.button {
 			flex:1,
@@ -19,13 +21,11 @@
 			margin:auto;
 			background-color:#3b4148;
 			padding:1.5vmax 3vmax 1.5vmax 3vmax;
-			border-radius:10%;
+			border-radius:1vmin;
 			border:solid 2px #222;
 			color:#ccc;
 			cursor:pointer;
 			user-select:none;
-			font-family:Arial, Helvetica, Sans-Serif;
-			font-weight:bold;
 			box-shadow:0px 0px 4px #333;
 		}
 		.button:hover {
@@ -33,13 +33,24 @@
 			color:#eee;
 			background-color:#555a60;
 		}
+		#title {
+			position:absolute;
+			top:0px;
+			left:0px;
+			width:100%;
+			height:12.5%;
+			display:grid;
+			align-content:center;
+			justify-content:center;
+			font-size:1.5rem;
+		}
 		#container {
 			display:flex;
 			position:absolute;
 			flex-direction:column;
 			width:80%;
 			height:80%;
-			top:0;
+			top:5%;
 			bottom:0;
 			left:0;
 			right:0;
@@ -99,49 +110,52 @@
 		class App extends React.Component{
 			render() {
 				const Atomic = window["react-atomic"].default;
-				return <div id="container">
-					<div id="row-top">
-						<div
-							className = "button"
-							onClick = {e => {
-								this.AtomicRef.current.setPlayState('running');
-							}}
-						>Run</div>
-						<div
-							className = "button"
-							onClick = {e => {
-								this.AtomicRef.current.setPlayState('paused');
-							}}
-						>Pause</div>
-						<div
-							className = "button"
-							onClick = {e => {
-								this.AtomicRef.current.setPlayState('reset');
-							}}
-						>Reset</div>
-						<div
-							className = "button"
-							onClick = {e => {
-								this.AtomicRef.current.setPlayState('cancel');
-							}}
-						>Cancel</div>
+				return <React.Fragment>
+					<div id="title">CSS Key Frames Sample</div>
+					<div id="container">
+						<div id="row-top">
+							<div
+								className = "button"
+								onClick = {e => {
+									this.AtomicRef.current.setPlayState('running');
+								}}
+							>Run</div>
+							<div
+								className = "button"
+								onClick = {e => {
+									this.AtomicRef.current.setPlayState('paused');
+								}}
+							>Pause</div>
+							<div
+								className = "button"
+								onClick = {e => {
+									this.AtomicRef.current.setPlayState('reset');
+								}}
+							>Reset</div>
+							<div
+								className = "button"
+								onClick = {e => {
+									this.AtomicRef.current.setPlayState('cancel');
+								}}
+							>Cancel</div>
+						</div>
+						<div id="row-bottom">
+							<Atomic
+								id = "circle"
+								animate = {{
+									keyframes:`
+										to {
+											transform:translateX(20vw);
+										}
+									`,
+									animation:'3s ease-in-out infinite alternate',
+									playState:'running'
+								}}
+								ref = {this.AtomicRef=React.createRef()}
+							></Atomic>
+						</div>
 					</div>
-					<div id="row-bottom">
-						<Atomic
-							id = "circle"
-							animate = {{
-								keyframes:`
-									to {
-										transform:translateX(20vw);
-									}
-								`,
-								animation:'3s ease-in-out infinite alternate',
-								playState:'running'
-							}}
-							ref = {this.AtomicRef=React.createRef()}
-						></Atomic>
-					</div>
-				</div>;
+				</React.Fragment>;
 			}
 		}
 		ReactDOM.render(<App/>, document.querySelector('#root'));

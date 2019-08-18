@@ -1,6 +1,6 @@
 {
 	"name": "@plutonium-js/react-atomic",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Atomic is an ultra lightweight React component that simplifies the management and control of CSS animations.",
 	"main": "dist/bundle.js",
 	"scripts": {
