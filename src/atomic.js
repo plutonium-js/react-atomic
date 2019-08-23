@@ -268,7 +268,7 @@ export class Atomic extends React.Component{
 			this.setState(state);
 			if (!params.skipReset && type==='reset') this.asyncRefs.add("reset", "requestAnimationFrame", requestAnimationFrame(() => {
 				//note: force reflow here to ensure the running class is applied by the browser on the next animation frame
-				_T.rootRef.current.offsetWidth;
+				this.rootRef.current.offsetWidth;
 				this.asyncRefs.add("reset", "requestAnimationFrame", requestAnimationFrame(() => {this.setPlayState(params.resetToPlayState||'running')}));
 			}));
 			this.playState = type;
